@@ -1,6 +1,6 @@
 # UIO Demo
 
-Ce projet a été créé avec l'article de blog "Comment exposer au userland des interruption avec UIO"
+Ce projet a été créé avec l'article de blog "Comment exposer au userland des interruption avec UIO"  
 https://linuxembedded.fr/2024/07/comment-exposer-au-userland-des-interruption-avec-uio
 
 Il contient le code illustrant l'utilisation de UIO pour le développement de drive dans le Userland.
@@ -15,19 +15,20 @@ Ce repo créé un driver et une appli de test:
 
 Pour utiliser le projet:
 
-- cloner : git clone
-- installer les header kernel : sudo apt install linux-headers-$(uname -r)
-- builder le module : make
-- builder l'appli de test : make uio_app
-- charger uio : sudo modprobe uio
-- charger le driver : sudo insmod uio_kbd.ko
-- lancer l'appli de test : sudo ./uio_app
-- taper sur le clavier (principal) doit afficher des messages:
-    Read interrupt count : 14 
-    Read interrupt count : 15...
-  Et dmesg doit afficher des traces:
-    [xxxx.xxxx] UIO handler
-- décharger le module : sudo rmmod uio_kbd
+- cloner : _git clone_
+- installer les header kernel : _sudo apt install linux-headers-$(uname -r)_
+- builder le module : _make_
+- builder l'appli de test : _make uio_app_
+- charger uio : _sudo modprobe uio_
+- charger le driver : _sudo insmod uio_kbd.ko_
+- lancer l'appli de test : _sudo ./uio_app_
+- taper sur le clavier (principal) doit afficher des messages:  
+    _Read interrupt count : 14_  
+    _Read interrupt count : 15..._  
+  Et dmesg doit afficher des traces:  
+    _[xxxx.xxxx] UIO handler_  
+- décharger le module : _sudo rmmod uio_kbd_
+
 
 
 

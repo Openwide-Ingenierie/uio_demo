@@ -52,7 +52,7 @@ int main()
             break;
         }
         
-        // actualy read, acknoledges the interrupt
+        // actually read, acknowledges the interrupt
         char buf[4];
         err = read(uiofd, buf, 4);
         if (err !=4){

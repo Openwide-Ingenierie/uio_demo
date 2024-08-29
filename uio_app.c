@@ -1,3 +1,9 @@
+/*
+ * This application is part of a UIO driver demonstration
+ * It opens the /dev/uio0 device and waits for events.
+ * 
+ */
+
 #include <stdlib.h> // EXIT codes
 #include <stdio.h> // printf
 #include <unistd.h> // sysconf
@@ -9,64 +15,65 @@
 
 int main()
 {
-    int uiofd;
-    int err = 0;
-    unsigned int i;
-    fd_set uiofd_set;
-    struct timeval tv;
-    int interrupt_count;
-    char* mem;
+	int uiofd;
+	int err = 0;
+	unsigned int i;
+	fd_set uiofd_set;
+	struct timeval tv;
+	int interrupt_count;
+	char* mem;
 
 
-    // open uio0
-    uiofd = open("/dev/uio0", O_RDONLY);
-    if (uiofd < 0) {
-        perror("uio open:");
-        return errno;
-    }
-    
-    // create mmap on uio0 / map0
-    mem = mmap(NULL, sysconf(_SC_PAGE_SIZE), PROT_READ, MAP_SHARED, uiofd , 0);
-    if (mem == MAP_FAILED){
-        perror("mmap failed");
-        close(uiofd);
-        exit(EXIT_FAILURE);
-    }
+	// open uio0
+	uiofd = open("/dev/uio0", O_RDONLY);
+	if (uiofd < 0) {
+		perror("uio open:");
+		return errno;
+	}
 
-    // prepare select structure
-    FD_ZERO(&uiofd_set);
-    FD_SET(uiofd, &uiofd_set);
+	// create mmap on uio0 / map0
+	mem = mmap(NULL, sysconf(_SC_PAGE_SIZE), PROT_READ, MAP_SHARED, uiofd , 0);
+	if (mem == MAP_FAILED){
+		perror("mmap failed");
+		close(uiofd);
+		exit(EXIT_FAILURE);
+	}
 
-    for(i = 0;i < 10; ++i) {
-        //  five second timeout (reset each time)
-        tv.tv_sec = 5;
-        tv.tv_usec = 0;
+	// prepare a set of FD for select with uiofd only
+	FD_ZERO(&uiofd_set);
+	FD_SET(uiofd, &uiofd_set);
 
-        // wait for interrupt
-        err = select(uiofd+1, &uiofd_set, NULL, NULL, &tv);
-        if (err < 0){
-            perror("select()");
-            break;
-        }else if(err == 0){
-            printf("Timeout, exiting\n");
-            break;
-        }
-        
-        // actually read, acknowledges the interrupt
-        char buf[4];
-        err = read(uiofd, buf, 4);
-        if (err !=4){
-            perror("Read error.");
-            break;
-        }
-        
-        // read interrupt count from memory mapping
-        memcpy(&interrupt_count, mem, sizeof(interrupt_count));
-        printf("Read interrupt count : %d \n", interrupt_count);
+	for(i = 0;i < 10; ++i) {
+		// five second timeout (reset each time)
+		tv.tv_sec = 5;
+		tv.tv_usec = 0;
 
-    }
-    
-    munmap(mem, sysconf(_SC_PAGE_SIZE));
-    close(uiofd);
-    exit(err);
+		// select waits for a group of file descriptor
+		// uiofd + 1 is the max_fd(uiofd_set) +1
+		err = select(uiofd+1, &uiofd_set, NULL, NULL, &tv);
+		if (err < 0){
+			perror("select()");
+			break;
+		}else if(err == 0){
+			printf("Timeout, exiting\n");
+			break;
+		}
+
+		// actually read, consumes the interrupt in uio driver.
+		char buf[4];
+		err = read(uiofd, buf, 4);
+		if (err !=4){
+			perror("Read error.");
+			break;
+		}
+
+		// read interrupt count from memory mapping
+		memcpy(&interrupt_count, mem, sizeof(interrupt_count));
+		printf("Read interrupt count : %d \n", interrupt_count);
+
+	}
+
+	munmap(mem, sysconf(_SC_PAGE_SIZE));
+	close(uiofd);
+	exit(err);
 }

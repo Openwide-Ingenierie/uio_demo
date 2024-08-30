@@ -19,7 +19,7 @@ MODULE_LICENSE("GPL");
 /*
  * Global variables
  */
-static const int irq = 1;
+static const int irq = 1; // IRQ 1 is the keyboard IRQ on Intel architecture.
 static struct uio_info *info;
 static struct device *dev;
 char *mem_area;

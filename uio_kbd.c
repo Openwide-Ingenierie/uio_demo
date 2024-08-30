@@ -76,7 +76,7 @@ static int __init uio_kbd_init(void)
 	info->mem[0].name = "basic_mem_map";
 	info->mem[0].memtype = UIO_MEM_LOGICAL;
 	info->mem[0].addr = (phys_addr_t) mem_area;
-	info->mem[0].size = sizeof(mem_area);
+	info->mem[0].size = PAGE_SIZE;
 
 	ret = uio_register_device(dev, info);
 	if (ret < 0) {
